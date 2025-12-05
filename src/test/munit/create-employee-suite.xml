@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="create-employee-suite.xml" />
+	    <http:request-config name="HTTP_Request_Configuration" basePath="/emp">
+        <http:request-connection host="localhost" port="8081" />
+    </http:request-config>
+    <munit:test name="post:\create-emp:application\json:reqress-api-teste-config-404-application\json-FlowTest" description="Verifying functionality of [post:\create-emp:application\json:reqress-api-teste-config-404-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="reqress-api-teste-main" />
+            <munit:enable-flow-source value="post:\create-emp:application\json:reqress-api-teste-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="7471a129-249c-43c6-a853-db8551f9d3bd" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="adfd519e-593e-45f5-b72d-0ddfe8f74986" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+        </munit:behavior>
+		<munit:execution>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_create-emp_application_json.json')]" />
+			<http:request config-ref="HTTP_Request_Configuration" method="POST" path="/create-emp" responseTimeout="#[60000000000000000]">
+                <http:headers><![CDATA[#[{"Accept":"application/json","Content-Type":"application/json"}]]]></http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="404" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/post_404_create-emp_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>
+    <munit:test name="post:\create-emp:application\json:reqress-api-teste-config-500-application\json-FlowTest" description="Verifying functionality of [post:\create-emp:application\json:reqress-api-teste-config-500-application\json]">
+        <munit:enable-flow-sources>
+            <munit:enable-flow-source value="reqress-api-teste-main" />
+            <munit:enable-flow-source value="post:\create-emp:application\json:reqress-api-teste-config" />
+        </munit:enable-flow-sources>
+        <munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4c372736-b274-4992-b56a-d44cb093dcff" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="adfd519e-593e-45f5-b72d-0ddfe8f74986" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+        </munit:behavior>
+		<munit:execution>
+            <set-payload value="#[MunitTools::getResourceAsString('scaffolder/request/post_create-emp_application_json.json')]" />
+			<http:request config-ref="HTTP_Request_Configuration" method="POST" path="/create-emp">
+                <http:headers>#[{"Accept":"application/json","Content-Type":"application/json"}]</http:headers>
+                <http:response-validator>
+                    <http:success-status-code-validator values="500" />
+                </http:response-validator>
+            </http:request>
+        </munit:execution>
+        <munit:validation>
+            <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(500)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 500" />
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/post_500_create-emp_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+        </munit:validation>
+    </munit:test>
+	<munit:test
+		name="post:\create-emp:application\json:reqress-api-teste-success"
+		doc:id="612c9d55-425f-4f2c-bb6d-015f953207f7">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock Insert"
+				doc:id="28441c45-b2f5-4d51-a22e-feea98265b73" processor="db:insert">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="49385ed7-3e0f-4a75-bb76-991157008ded"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value="#[output application/java --- readUrl('classpath://postcreateempapplicationjsonreqressapitestesuccess\mock_payload.dwl')]"
+						mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables>
+						<munit-tools:variable key="empId"
+							value="#[output application/json --- readUrl('classpath://postcreateempapplicationjsonreqressapitestesuccess\mock_variable_.dwl')]"
+							mediaType="application/json" encoding="UTF-8" />
+						<munit-tools:variable key="outboundHeaders"
+							value="#[readUrl('classpath://postcreateempapplicationjsonreqressapitestesuccess\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Input"
+				doc:id="b5e739d0-2e9f-4364-b8de-34c2b7e02550">
+				<munit:payload
+					value="#[output application/json --- readUrl('classpath://postcreateempapplicationjsonreqressapitestesuccess\set-event_payload.dwl')]"
+					encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes
+					value="#[readUrl('classpath://postcreateempapplicationjsonreqressapitestesuccess\set-event_attributes.dwl')]" />
+				<munit:variables>
+					<munit:variable key="outboundHeaders"
+						value="#[readUrl('classpath://postcreateempapplicationjsonreqressapitestesuccess\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref
+				doc:name="Flow-ref to post:\create-emp:application\json:reqress-api-teste-config"
+				doc:id="10282983-aee1-4daf-8f37-8745291e8e6b"
+				name="post:\create-emp:application\json:reqress-api-teste-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert doc:name="Assert payload"
+				doc:id="eef1bf64-5b4e-44c2-b92e-7f30dcca29b2"
+				message="The payload does not match">
+				<munit-tools:that><![CDATA[#[%dw 2.0
+import postcreateempapplicationjsonreqressapitestesuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call
+				doc:name="Verify Request"
+				doc:id="5f57beb2-fa3e-4be9-aa14-f68f6592f16e"
+				processor="http:request" times="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="adfd519e-593e-45f5-b72d-0ddfe8f74986"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+</mule>

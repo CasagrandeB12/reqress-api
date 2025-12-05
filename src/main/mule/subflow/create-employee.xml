@@ -28,7 +28,7 @@ output application/json
 {
 	empId: payload.id,
 	empName: payload.name,
-	empStatus: "A"
+	empStatus: "F"
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="f92d5194-0396-4af1-b859-6793766d51a2" >
+		<db:oracle-connection host="localhost" user="system" password="0" />
+	</db:config>
+	<flow
+		name="post:\create-emp:application\json:reqress-api-teste-config">
+		<logger level="INFO" doc:name="Start Logger" doc:id="9dfd6bc0-8b74-42ca-ba47-8177eee71623" message="Start Logger"/>
+		<set-variable value="#[payload.empId]" doc:name="Set Variable" doc:id="0c7d8395-9a74-475f-be43-6d6c8fa29c11" variableName="empId"/>
+		<http:request method="GET" doc:name="Request Certo" doc:id="adfd519e-593e-45f5-b72d-0ddfe8f74986" url="https://jsonplaceholder.typicode.com/users/{empId}">
+			<http:uri-params ><![CDATA[#[{
+	empId: vars.empId
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="f255f2e8-5d0b-4f31-b6ca-8e2d743e9af2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	empId: payload.id,
+	empName: payload.name,
+	empStatus: "F"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:id="49385ed7-3e0f-4a75-bb76-991157008ded" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into emp (emp_id, emp_name, emp_status) values (:empId, :empName, :empStatus) ]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  code: 200,
+  message: "Employee created"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler>
+			<on-error-propagate enableNotifications="true"
+				logException="true" doc:name="On Error Propagate"
+				doc:id="f828c77b-4047-4e05-8a13-aaef6dff528f"
+				type="HTTP:NOT_FOUND">
+				<ee:transform doc:name="Transform Message"
+					doc:id="31f5d54e-cd2f-49df-b8b8-883a33b23f64">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  code: 404,
+  message: "Not Emp Found"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a96522a6-8762-48d4-8f1f-af6429253b72" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="7dbca38e-d06a-4cb5-ba18-fa59b7d12664" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  code: 500,
+  message: "Internal Server Error"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[500]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		
+</error-handler>
+	</flow>
+</mule>
